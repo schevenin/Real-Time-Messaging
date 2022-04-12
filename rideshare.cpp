@@ -1,9 +1,9 @@
 /**
  * @file rideshare.cpp
- * @author Rogelio Schevenin, Sawyer Thompson
+ * @authors Rogelio Schevenin, Sawyer Thompson
  * @redID 824107681, 823687079
  * @brief Real-time Messaging for Ridesharing entry point
- * @date 2022-03-21
+ * @date 2022-04-21
  */
 
 #include "rideshare.h"
