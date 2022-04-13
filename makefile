@@ -9,9 +9,10 @@ CXX=g++ -g
 #	-g          include information for symbolic debugger e.g. gdb 
 CXXFLAGS=-std=c++11 -g
 
-rideshare : rideshare.o
+rideshare : driver.o rideshare.o
 	$(CXX) $(CXXFLAGS) -o rideshare $^
 rideshare.o : rideshare.cpp rideshare.h
+driver.o : driver.cpp
 
 clean :
 	rm -rf *.o
