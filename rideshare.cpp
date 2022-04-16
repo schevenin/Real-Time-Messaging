@@ -6,8 +6,9 @@
  * @date 2022-04-21
  */
 
-#include "produce.h"
-#include "customer.h"
+#include "producer.h"
+#include "consumer.h"
+
 /**
  * @brief Main Execution of Real-time Messaging for Ridesharing
  *
@@ -18,12 +19,8 @@
 int main(int argc, char **argv)
 {
 
-   
-    int productionLimit = 120;
-    int costSavingDispatchTime = 0;
-    int fastMatchingDispatchTime = 0;
-    int humanDriverProductionTime = 0;
-    int autoDriverProductionTime = 0;
+    // initialize shared data structure
+    Monitor *monitor = new Monitor();
 
     // check optional arguments
     int opt;
@@ -33,7 +30,7 @@ int main(int argc, char **argv)
         {
         // sets total number of requests
         case 'n':
-            productionLimit = atoi(optarg);
+            monitor->productionLimit = atoi(optarg);
 
             // verify production limit is a number
             for (int i = 0; optarg[i] != 0; i++)
@@ -48,7 +45,7 @@ int main(int argc, char **argv)
             break;
         // sets time (ms) required by cost saving dispatcher
         case 'c':
-            costSavingDispatchTime = atoi(optarg);
+            monitor->costSavingDispatchTime = atoi(optarg);
 
             // verify cost saving dispatch time is a number
             for (int i = 0; optarg[i] != 0; i++)
@@ -63,7 +60,7 @@ int main(int argc, char **argv)
             break;
         // sets time (ms) required by fast-matching dispatcher
         case 'f':
-            fastMatchingDispatchTime = atoi(optarg);
+            monitor->fastMatchingDispatchTime = atoi(optarg);
 
             // verify fast-matching dispatch time is a number
             for (int i = 0; optarg[i] != 0; i++)
@@ -78,7 +75,7 @@ int main(int argc, char **argv)
             break;
         // sets time (ms) required to produce a ride request for a human driver
         case 'h':
-            humanDriverProductionTime = atoi(optarg);
+            monitor->humanDriverProductionTime = atoi(optarg);
 
             // verify human driver production time is a number
             for (int i = 0; optarg[i] != 0; i++)
@@ -93,7 +90,7 @@ int main(int argc, char **argv)
             break;
         // sets time (ms) required to produce a ride request for an autonomous car
         case 'a':
-            autoDriverProductionTime = atoi(optarg);
+            monitor->autoDriverProductionTime = atoi(optarg);
 
             // verify autonomous driver production time is a number
             for (int i = 0; optarg[i] != 0; i++)
@@ -110,31 +107,21 @@ int main(int argc, char **argv)
             exit(EXIT_FAILURE);
         }
     }
+    
     // initialize threads
-    pthread_t thread1;
-    pthread_t thread2;
-
-    //initialize shared data structure
-    Monitor *monitor = new Monitor();
+    pthread_t autoReqProducer;
+    pthread_t humanReqProducer;
+    pthread_t autoReqConsumer;
+    pthread_t humanReqConsumer;
 
     //initialize semaphores
-    sem_init(&monitor->consumed,0,1);
-    sem_init(&monitor->unconsumed,0,1);
-    sem_init(&monitor->availableSlots,0,bufferSize);
+    sem_init(&monitor->empty, 0, 1);
+    sem_init(&monitor->full, 0, 0);
+    sem_init(&monitor->availableSlots, 0, bufferCapacity);
 
-    // create threads
-    for (size_t i = 0; i < RequestTypeN; i++)
-    {
-        monitor->requestType=i;
-        pthread_create(&thread1, NULL, &produce, (void *) monitor);
-    }
-    
-    for (size_t i = 0; i < ConsumerTypeN; i++)
-    {
-        monitor->consumerType=i;
-       pthread_create(&thread2, NULL, &consume, (void *) monitor);
-        sleep(5);
-
-    }
-    
+    // create threads for 2 producers and 2 consumers
+    pthread_create(&autoReqProducer, NULL, &produce, (void *) monitor);
+    pthread_create(&humanReqProducer, NULL, &produce, (void *) monitor);
+    pthread_create(&autoReqConsumer, NULL, &consume, (void *) monitor);
+    pthread_create(&humanReqConsumer, NULL, &consume, (void *) monitor);    
 }

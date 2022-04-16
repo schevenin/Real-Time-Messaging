@@ -1,6 +1,5 @@
-
-#ifndef CUSTOMER_H
-#define CUSTOMER_H
+#ifndef CONSUMER_H
+#define CONSUMER_H
 
 #include <iostream>
 #include <stdio.h>
@@ -8,8 +7,6 @@
 #include <time.h>
 #include "rideshare.h"
 #include "io.h"
-
-//#include "rideshare.h"
 
 void *consume(void *);
 
