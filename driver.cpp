@@ -6,12 +6,8 @@
  * @date 2022-04-21
  */
 
-#include <iostream>
-#include <stdio.h>
-#include <unistd.h>
-
-#include "rideshare.h"
-
+#include "produce.h"
+#include "customer.h"
 /**
  * @brief Main Execution of Real-time Messaging for Ridesharing
  *
@@ -22,8 +18,7 @@
 int main(int argc, char **argv)
 {
 
-    printf("Hello, world!\n");
-
+   
     int productionLimit = 120;
     int costSavingDispatchTime = 0;
     int fastMatchingDispatchTime = 0;
@@ -115,4 +110,31 @@ int main(int argc, char **argv)
             exit(EXIT_FAILURE);
         }
     }
+    // initialize threads
+    pthread_t thread1;
+    pthread_t thread2;
+
+    //initialize shared data structure
+    Monitor *monitor = new Monitor();
+
+    //initialize semaphores
+    sem_init(&monitor->consumed,0,1);
+    sem_init(&monitor->unconsumed,0,1);
+    sem_init(&monitor->availableSlots,0,bufferSize);
+
+    // create threads
+    for (size_t i = 0; i < RequestTypeN; i++)
+    {
+        monitor->requestType=i;
+        pthread_create(&thread1, NULL, &produce, (void *) monitor);
+    }
+    
+    for (size_t i = 0; i < ConsumerTypeN; i++)
+    {
+        monitor->consumerType=i;
+       pthread_create(&thread2, NULL, &consume, (void *) monitor);
+        sleep(5);
+
+    }
+    
 }

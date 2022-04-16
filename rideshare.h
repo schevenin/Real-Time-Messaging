@@ -1,6 +1,11 @@
 #ifndef RIDESHARE_H
 #define RIDESHARE_H
 
+#include "semaphore.h"
+#include <queue>
+
+#define bufferSize 12
+#define humanSize 4
 /*
  * Arrays with producer and consumer names
  * These can be indexed with the enumerated types below
@@ -35,7 +40,7 @@ enum Requests {
   HumanDriver = 0,   // ride with a human driver
   RoboDriver = 1,  // ride with an autonomous car 
   RequestTypeN = 2,   // number of ride request types
-} RequestType;
+};
 
 /* 
  * Two dispatcher services (consumers of requests) are available using 
@@ -49,9 +54,17 @@ enum Consumers {
   CostAlgoDispatch = 0,   // dispatch to a nearby driver based on cost
   FastAlgoDispatch = 1,  // dispatch to a nearby driver based on fast matching 
   ConsumerTypeN = 2,   // Number of consumers
-} ConsumerType;
+};
 
-
-
+struct Monitor{
+  int consumerType;
+  int requestType;
+  sem_t consumed;
+  sem_t unconsumed;
+  sem_t availableSlots;
+  sem_t empty;
+  sem_t full;
+  std::queue <int> broker;
+};
 
 #endif
