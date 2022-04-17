@@ -18,14 +18,19 @@ void *produce(void *ptr)
 
         // access buffer exclusively
         sem_wait(&upc->broker->mutex);
-        
+
         // place new item in buffer
         upc->broker->buffer[index] = item;
         index = (index+1) % BUFFER_CAP;
 
-        // printing
+        // update produced counter
         upc->broker->requestsProduced += 1;     
-        std::cout << "Requests produced: " << upc->broker->requestsProduced << std::endl;
+        
+        // printing
+        //std::cout << "Requests produced: " << upc->broker->requestsProduced << std::endl;
+        printf("Requests produced: %i\n", upc->broker->requestsProduced);
+        //fflush(stdout);
+
         // release exclusive access to buffer
         sem_post(&upc->broker->mutex);
         

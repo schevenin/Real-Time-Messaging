@@ -19,17 +19,21 @@ void *consume(void *ptr)
         // remove item from buffer
         int removed = upc->broker->buffer[index];
         index = (index+1) % BUFFER_CAP;
+
+        // update consumed counter
+        upc->broker->requestsConsumed += 1;     
         
         // printing
-        upc->broker->requestsConsumed += 1;     
-        std::cout << "Requests consumed: " << upc->broker->requestsConsumed << std::endl;
-
+        //std::cout << "Requests consumed: " << upc->broker->requestsConsumed << std::endl;
+        printf("Requests consumed: %i\n", upc->broker->requestsConsumed);
+        //fflush(stdout);
+ 
         // release exclusive access to buffer
         sem_post(&upc->broker->mutex);
 
         // inform producer there are empty slots
         sem_post(&upc->broker->emptySlots);
-        
+
         // sleep for time to consume
         sleep(upc->sleepTime);
 
