@@ -4,6 +4,10 @@
 #include <semaphore.h>
 #include <queue>
 
+#define HUMAN_REQ_CAP 4
+#define BUFFER_CAP 12
+#define DEFAULT_PROD_LIMIT 120
+
 /*
  * Arrays with producer and consumer names
  * These can be indexed with the enumerated types below
@@ -58,30 +62,23 @@ enum Consumers
 
 struct Broker
 {
-  std::queue<int> buffer;
+  int *buffer;
 
   // semaphores
   sem_t emptyHumanSlots;
   sem_t emptySlots;
   sem_t filledSlots;
+  sem_t mutex;
 
-  // produce & consume intervals
-  int productionLimit = 120;
-  int costSavingDispatchTime = 0;
-  int fastMatchingDispatchTime = 0;
-  int humanDriverProductionTime = 0;
-  int autoDriverProductionTime = 0;
-
-  int bufferCapacity = 12;
-  int humanReqCapacity = 4;
-
-  // other data
-  int requestsProduced = 0;
+  int productionLimit;
+  int requestsProduced;
+  int requestsConsumed;
 };
 
 struct UniquePC {
   Broker *broker;
   int sleepTime;
-  char *flag;
+  int type;
 };
+
 #endif

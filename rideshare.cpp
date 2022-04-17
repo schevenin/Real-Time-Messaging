@@ -9,6 +9,7 @@
 #include "producer.h"
 #include "consumer.h"
 
+
 /**
  * @brief Main Execution of Real-time Messaging for Ridesharing
  *
@@ -21,6 +22,7 @@ int main(int argc, char **argv)
 
     // initialize shared data structure
     Broker *broker = new Broker();
+    broker->buffer = new int[BUFFER_CAP];
 
     // initialize PC objects
     UniquePC *HR = new UniquePC();
@@ -34,6 +36,15 @@ int main(int argc, char **argv)
     FC->broker = broker;
     CSC->broker = broker;
 
+    // set flags
+    HR->type = HumanDriver;
+    AR->type = RoboDriver;
+    FC->type = FastAlgoDispatch;
+    CSC->type = CostAlgoDispatch;
+
+    // default request production limit
+    broker->productionLimit = DEFAULT_PROD_LIMIT;
+    
     // check optional arguments
     int opt;
     while ((opt = getopt(argc, argv, "n:c:f:h:a:")) != -1)
@@ -127,14 +138,21 @@ int main(int argc, char **argv)
     pthread_t costSaveReqConsumer;
 
     //initialize semaphores
-    sem_init(&broker->emptyHumanSlots, 0, 1);
     sem_init(&broker->filledSlots, 0, 0);
-    sem_init(&broker->emptySlots, 0, broker->bufferCapacity);
+    sem_init(&broker->emptySlots, 0, BUFFER_CAP);
+    sem_init(&broker->emptyHumanSlots, 0, HUMAN_REQ_CAP);
+    sem_init(&broker->mutex, 0, 1);
 
     // create threads for 2 producers and 2 consumers
     pthread_create(&humanReqProducer, NULL, &produce, (void *) HR);
     pthread_create(&autoReqProducer, NULL, &produce, (void *) AR);
     pthread_create(&fastReqConsumer, NULL, &consume, (void *) FC);
-    pthread_create(&costSaveReqConsumer, NULL, &consume, (void *) CSC);    
+    pthread_create(&costSaveReqConsumer, NULL, &consume, (void *) CSC);
+
+    while (broker->requestsConsumed < broker->productionLimit) {
+        // hasn't fininshed    
+    }
+
+    exit(EXIT_SUCCESS);
 }
 

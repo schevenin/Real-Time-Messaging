@@ -2,35 +2,34 @@
 
 void *produce(void *ptr)
 {
-    Broker *broker = (Broker *)ptr;
+    UniquePC *upc = (UniquePC *)ptr;
 
-    int item = 0;
+    // item to be added to queue
+    int item = upc->type;
+    int index = 0;
 
-    while (broker->requestsProduced != broker->productionLimit) 
+    while (true) 
     {
         // sleep for production time
-        sleep(broker->autoDriverProductionTime);
+        sleep(upc->sleepTime);
 
-        // if buffer is full, down the emptySlots semaphore
-        if (broker->buffer.size() == broker->bufferCapacity)
-        {
-            sem_wait(&broker->emptySlots);
-        }
+        // wait for empty slots
+        sem_wait(&upc->broker->emptySlots);
 
-        // if item to be added will be the only item in buffer
-        bool onlyItem = (broker->buffer.size() == 0);
+        // access buffer exclusively
+        sem_wait(&upc->broker->mutex);
         
         // place new item in buffer
-        broker->buffer.push(item);
-        broker->filledSlots += 1;
+        upc->broker->buffer[index] = item;
+        index = (index+1) % BUFFER_CAP;
 
-        // if first item in buffer, up filledSlots semaphore
-        if (onlyItem)
-        {
-            sem_post(&broker->filledSlots);
-        }
-
+        // printing
+        upc->broker->requestsProduced += 1;     
+        std::cout << "Requests produced: " << upc->broker->requestsProduced << std::endl;
+        // release exclusive access to buffer
+        sem_post(&upc->broker->mutex);
         
-        broker->requestsProduced += 1;
+        // inform consumer there are filled slots
+        sem_post(&upc->broker->filledSlots);
     }
 }
