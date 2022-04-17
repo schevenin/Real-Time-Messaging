@@ -2,7 +2,7 @@
 #define RIDESHARE_H
 
 #include <semaphore.h>
-#include <queue>
+#include <pthread.h>
 
 #define HUMAN_REQ_CAP 4
 #define BUFFER_CAP 12
