@@ -117,7 +117,7 @@ int main(int argc, char **argv)
     //initialize semaphores
     sem_init(&monitor->empty, 0, 1);
     sem_init(&monitor->full, 0, 0);
-    sem_init(&monitor->availableSlots, 0, bufferCapacity);
+    sem_init(&monitor->emptySlots, 0, monitor->bufferCapacity);
 
     // create threads for 2 producers and 2 consumers
     pthread_create(&autoReqProducer, NULL, &produce, (void *) monitor);

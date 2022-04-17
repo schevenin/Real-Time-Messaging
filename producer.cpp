@@ -4,28 +4,33 @@ void *produce(void *ptr)
 {
     Monitor *monitor = (Monitor *)ptr;
 
-    int request = 0;
+    int item = 0;
 
     while (monitor->requestsProduced != monitor->productionLimit) 
     {
-        while (monitor->buffer.size() == monitor->bufferCapacity)
+        // sleep for production time
+        sleep(monitor->autoDriverProductionTime);
+
+        // if buffer is full, down the emptySlots semaphore
+        if (monitor->buffer.size() == monitor->bufferCapacity)
         {
-            sem_wait(monitor->emptySlots);
+            sem_wait(&monitor->emptySlots);
         }
 
+        // if item to be added will be the only item in buffer
         bool onlyItem = (monitor->buffer.size() == 0);
-        monitor->buffer.push(request);
         
+        // place new item in buffer
+        monitor->buffer.push(item);
+        monitor->filledSlots += 1;
+
+        // if first item in buffer, up filledSlots semaphore
         if (onlyItem)
         {
-            sem_post(monitor->filledSlots);
+            sem_post(&monitor->filledSlots);
         }
 
-        sleep(monitor->humanDriverProductionTime);
+        
+        monitor->requestsProduced += 1;
     }
-
-
-
-
-    
 }
