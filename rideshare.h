@@ -79,4 +79,20 @@ struct Monitor
   int requestsProduced = 0;
 };
 
+struct HumanRequest{
+  Monitor *monitor;
+  int sleeptime;
+};
+struct autoRequest{
+  Monitor *monitor;
+  int sleeptime;
+};
+struct FastConsume{
+  Monitor *monitor;
+  int sleeptime;
+};
+struct CostSaveConsume{
+  Monitor *monitor;
+  int sleeptime;
+};
 #endif

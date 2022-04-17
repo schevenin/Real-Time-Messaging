@@ -22,6 +22,18 @@ int main(int argc, char **argv)
     // initialize shared data structure
     Monitor *monitor = new Monitor();
 
+    // initialize other object
+    HumanRequest *HR = new HumanRequest();
+    autoRequest *AR = new autoRequest();
+    FastConsume *FC = new FastConsume();
+    CostSaveConsume *CSC = new CostSaveConsume();
+
+    //Set monitor of each object
+    HR->monitor = monitor;
+    AR->monitor = monitor;
+    FC->monitor = monitor;
+    CSC->monitor = monitor;
+
     // check optional arguments
     int opt;
     while ((opt = getopt(argc, argv, "n:c:f:h:a:")) != -1)
@@ -111,17 +123,18 @@ int main(int argc, char **argv)
     // initialize threads
     pthread_t autoReqProducer;
     pthread_t humanReqProducer;
-    pthread_t autoReqConsumer;
-    pthread_t humanReqConsumer;
+    pthread_t FastConsumer;
+    pthread_t CostSaveConsumer;
 
     //initialize semaphores
-    sem_init(&monitor->empty, 0, 1);
-    sem_init(&monitor->full, 0, 0);
+    sem_init(&monitor->emptyHumanSlots, 0, 1);
+    sem_init(&monitor->filledSlots, 0, 0);
     sem_init(&monitor->emptySlots, 0, monitor->bufferCapacity);
 
     // create threads for 2 producers and 2 consumers
-    pthread_create(&autoReqProducer, NULL, &produce, (void *) monitor);
-    pthread_create(&humanReqProducer, NULL, &produce, (void *) monitor);
-    pthread_create(&autoReqConsumer, NULL, &consume, (void *) monitor);
-    pthread_create(&humanReqConsumer, NULL, &consume, (void *) monitor);    
+    pthread_create(&humanReqProducer, NULL, &produce, (void *) HR);
+    pthread_create(&autoReqProducer, NULL, &produce, (void *) AR);
+    pthread_create(&FastConsumer, NULL, &consume, (void *) FC);
+    pthread_create(&CostSaveConsumer, NULL, &consume, (void *) CSC);    
 }
+
