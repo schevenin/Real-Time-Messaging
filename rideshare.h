@@ -56,7 +56,7 @@ enum Consumers
   ConsumerTypeN = 2,    // Number of consumers
 };
 
-struct Monitor
+struct Broker
 {
   std::queue<int> buffer;
 
@@ -79,20 +79,9 @@ struct Monitor
   int requestsProduced = 0;
 };
 
-struct HumanRequest{
-  Monitor *monitor;
-  int sleeptime;
-};
-struct autoRequest{
-  Monitor *monitor;
-  int sleeptime;
-};
-struct FastConsume{
-  Monitor *monitor;
-  int sleeptime;
-};
-struct CostSaveConsume{
-  Monitor *monitor;
-  int sleeptime;
+struct UniquePC {
+  Broker *broker;
+  int sleepTime;
+  char *flag;
 };
 #endif

@@ -2,35 +2,35 @@
 
 void *produce(void *ptr)
 {
-    Monitor *monitor = (Monitor *)ptr;
+    Broker *broker = (Broker *)ptr;
 
     int item = 0;
 
-    while (monitor->requestsProduced != monitor->productionLimit) 
+    while (broker->requestsProduced != broker->productionLimit) 
     {
         // sleep for production time
-        sleep(monitor->autoDriverProductionTime);
+        sleep(broker->autoDriverProductionTime);
 
         // if buffer is full, down the emptySlots semaphore
-        if (monitor->buffer.size() == monitor->bufferCapacity)
+        if (broker->buffer.size() == broker->bufferCapacity)
         {
-            sem_wait(&monitor->emptySlots);
+            sem_wait(&broker->emptySlots);
         }
 
         // if item to be added will be the only item in buffer
-        bool onlyItem = (monitor->buffer.size() == 0);
+        bool onlyItem = (broker->buffer.size() == 0);
         
         // place new item in buffer
-        monitor->buffer.push(item);
-        monitor->filledSlots += 1;
+        broker->buffer.push(item);
+        broker->filledSlots += 1;
 
         // if first item in buffer, up filledSlots semaphore
         if (onlyItem)
         {
-            sem_post(&monitor->filledSlots);
+            sem_post(&broker->filledSlots);
         }
 
         
-        monitor->requestsProduced += 1;
+        broker->requestsProduced += 1;
     }
 }

@@ -20,19 +20,19 @@ int main(int argc, char **argv)
 {
 
     // initialize shared data structure
-    Monitor *monitor = new Monitor();
+    Broker *broker = new Broker();
 
-    // initialize other object
-    HumanRequest *HR = new HumanRequest();
-    autoRequest *AR = new autoRequest();
-    FastConsume *FC = new FastConsume();
-    CostSaveConsume *CSC = new CostSaveConsume();
+    // initialize PC objects
+    UniquePC *HR = new UniquePC();
+    UniquePC *AR = new UniquePC();
+    UniquePC *FC = new UniquePC();
+    UniquePC *CSC = new UniquePC();
 
-    //Set monitor of each object
-    HR->monitor = monitor;
-    AR->monitor = monitor;
-    FC->monitor = monitor;
-    CSC->monitor = monitor;
+    // add monitor pointers to PC objects
+    HR->broker = broker;
+    AR->broker = broker;
+    FC->broker = broker;
+    CSC->broker = broker;
 
     // check optional arguments
     int opt;
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
         {
         // sets total number of requests
         case 'n':
-            monitor->productionLimit = atoi(optarg);
+            broker->productionLimit = atoi(optarg);
 
             // verify production limit is a number
             for (int i = 0; optarg[i] != 0; i++)
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
             break;
         // sets time (ms) required by cost saving dispatcher
         case 'c':
-            monitor->costSavingDispatchTime = atoi(optarg);
+            CSC->sleepTime = atoi(optarg);
 
             // verify cost saving dispatch time is a number
             for (int i = 0; optarg[i] != 0; i++)
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
             break;
         // sets time (ms) required by fast-matching dispatcher
         case 'f':
-            monitor->fastMatchingDispatchTime = atoi(optarg);
+            FC->sleepTime = atoi(optarg);
 
             // verify fast-matching dispatch time is a number
             for (int i = 0; optarg[i] != 0; i++)
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
             break;
         // sets time (ms) required to produce a ride request for a human driver
         case 'h':
-            monitor->humanDriverProductionTime = atoi(optarg);
+            HR->sleepTime = atoi(optarg);
 
             // verify human driver production time is a number
             for (int i = 0; optarg[i] != 0; i++)
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
             break;
         // sets time (ms) required to produce a ride request for an autonomous car
         case 'a':
-            monitor->autoDriverProductionTime = atoi(optarg);
+            AR->sleepTime = atoi(optarg);
 
             // verify autonomous driver production time is a number
             for (int i = 0; optarg[i] != 0; i++)
@@ -121,20 +121,20 @@ int main(int argc, char **argv)
     }
     
     // initialize threads
-    pthread_t autoReqProducer;
     pthread_t humanReqProducer;
-    pthread_t FastConsumer;
-    pthread_t CostSaveConsumer;
+    pthread_t autoReqProducer;
+    pthread_t fastReqConsumer;
+    pthread_t costSaveReqConsumer;
 
     //initialize semaphores
-    sem_init(&monitor->emptyHumanSlots, 0, 1);
-    sem_init(&monitor->filledSlots, 0, 0);
-    sem_init(&monitor->emptySlots, 0, monitor->bufferCapacity);
+    sem_init(&broker->emptyHumanSlots, 0, 1);
+    sem_init(&broker->filledSlots, 0, 0);
+    sem_init(&broker->emptySlots, 0, broker->bufferCapacity);
 
     // create threads for 2 producers and 2 consumers
     pthread_create(&humanReqProducer, NULL, &produce, (void *) HR);
     pthread_create(&autoReqProducer, NULL, &produce, (void *) AR);
-    pthread_create(&FastConsumer, NULL, &consume, (void *) FC);
-    pthread_create(&CostSaveConsumer, NULL, &consume, (void *) CSC);    
+    pthread_create(&fastReqConsumer, NULL, &consume, (void *) FC);
+    pthread_create(&costSaveReqConsumer, NULL, &consume, (void *) CSC);    
 }
 

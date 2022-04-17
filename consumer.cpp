@@ -2,15 +2,15 @@
 
 void *consume(void *ptr)
 {
-    Monitor *monitor = (Monitor *)ptr;
+    Broker *broker = (Broker *)ptr;
 
     while (true) 
     {
         // down the filledSlots semaphore
-        sem_wait(&monitor->filledSlots);
+        sem_wait(&broker->filledSlots);
 
         // access buffer exclusively
-        monitor->buffer.pop();
+        broker->buffer.pop();
 
         
 
