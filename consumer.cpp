@@ -6,13 +6,13 @@ void *consume(void *ptr)
 
     while (true) 
     {
-        // 
+        // down the filledSlots semaphore
         sem_wait(&monitor->filledSlots);
 
         // access buffer exclusively
         monitor->buffer.pop();
 
-
+        
 
     }
 

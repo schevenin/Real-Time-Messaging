@@ -60,14 +60,10 @@ struct Monitor
 {
   std::queue<int> buffer;
 
-
-
   // semaphores
   sem_t emptyHumanSlots;
   sem_t emptySlots;
   sem_t filledSlots;
-  sem_t empty;
-  sem_t full;
 
   // produce & consume intervals
   int productionLimit = 120;
