@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include "rideshare.h"
+#include "io.h"
 
 void *produce(void *);
 

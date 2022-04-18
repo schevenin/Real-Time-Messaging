@@ -73,6 +73,10 @@ struct Broker
   int productionLimit;
   int requestsProduced;
   int requestsConsumed;
+
+  int *production;
+  int *consumed;
+  int *inRequestQueue;
 };
 
 struct UniquePC {

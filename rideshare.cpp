@@ -22,6 +22,9 @@ int main(int argc, char **argv)
     // initialize shared data structure
     Broker *broker = new Broker();
     broker->buffer = new int[BUFFER_CAP];
+    broker->production = new int[broker->productionLimit];
+    broker->consumed = new int[broker->productionLimit];
+    broker->inRequestQueue = new int[BUFFER_CAP];
 
     // initialize PC objects
     UniquePC *HR = new UniquePC();

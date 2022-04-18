@@ -26,9 +26,9 @@ void *produce(void *ptr)
         // update produced counter
         upc->broker->requestsProduced += 1;     
         // printing
-        //std::cout << "Requests produced: " << upc->broker->requestsProduced << std::endl;
+         io_add_type((Requests) item, upc->broker->buffer, upc->broker->production);
+
         printf("Requests produced: %i\n", upc->broker->requestsProduced);
-        //fflush(stdout);
 
         // release exclusive access to buffer
         sem_post(&upc->broker->mutex);

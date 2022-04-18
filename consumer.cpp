@@ -23,9 +23,8 @@ void *consume(void *ptr)
         // update consumed counter
         upc->broker->requestsConsumed += 1;     
         
-        // printing
-        //std::cout << "Requests consumed: " << upc->broker->requestsConsumed << std::endl;
-        printf("Requests consumed: %i\n", upc->broker->requestsConsumed);
+        //std::cout << "Requests produced: " << upc->broker->requestsProduced << std::endl;
+        printf("Consumes produced: %i\n", upc->broker->requestsConsumed);
         //fflush(stdout);
  
         // release exclusive access to buffer
