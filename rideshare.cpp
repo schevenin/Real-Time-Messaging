@@ -148,9 +148,10 @@ int main(int argc, char **argv)
     pthread_create(&fastReqConsumer, NULL, &consume, (void *) FC);
     pthread_create(&costSaveReqConsumer, NULL, &consume, (void *) CSC);
 
-    while (broker->requestsConsumed < broker->productionLimit) {
-        // hasn't fininshed    
-    }
+    pthread_join(humanReqProducer,NULL);
+    pthread_join(autoReqProducer,NULL);
+    pthread_join(fastReqConsumer,NULL);
+    pthread_join(costSaveReqConsumer,NULL);
 
     exit(EXIT_SUCCESS);
 }

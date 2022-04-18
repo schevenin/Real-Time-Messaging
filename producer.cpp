@@ -8,7 +8,7 @@ void *produce(void *ptr)
     int item = upc->type;
     int index = 0;
 
-    while (true) 
+    while (upc->broker->requestsProduced<upc->broker->productionLimit-1) 
     {
         // sleep for production time
         sleep(upc->sleepTime);
@@ -25,7 +25,6 @@ void *produce(void *ptr)
 
         // update produced counter
         upc->broker->requestsProduced += 1;     
-        
         // printing
         //std::cout << "Requests produced: " << upc->broker->requestsProduced << std::endl;
         printf("Requests produced: %i\n", upc->broker->requestsProduced);

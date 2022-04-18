@@ -8,7 +8,7 @@ void *consume(void *ptr)
     int index = 0;
 
 
-    while (true)
+    while (upc->broker->requestsConsumed<upc->broker->productionLimit-1)
     {
         // wait for filled slots
         sem_wait(&upc->broker->filledSlots);
