@@ -4,8 +4,9 @@ void *consume(void *ptr)
 {
     UniquePC *upc = (UniquePC *)ptr;
 
-    int item = upc->type;
+    int algorithmType = upc->type;
     int index = 0;
+    int item;
     int removed;
     int value;
 
@@ -19,22 +20,31 @@ void *consume(void *ptr)
         
         // update consumed counter 
         upc->broker->requestsConsumed += 1;   
+        item = upc->broker->buffer.front();
+        upc->broker->buffer.pop();
+        // add Type
+        if (algorithmType == CostAlgoDispatch)
+        {
+            upc->broker->consumed[CostAlgoDispatch] += 1;
+        }
+        else if (algorithmType == FastAlgoDispatch)
+        {
+            upc->broker->consumed[FastAlgoDispatch] += 1;
+        }
 
         // remove from queue
         if (item == RoboDriver)
         {
             upc->broker->inRequestQueue[RoboDriver] -= 1;
-            upc->broker->consumed[CostAlgoDispatch] += 1;
         }
         else if (item == HumanDriver)
         {
             upc->broker->inRequestQueue[HumanDriver] -= 1;
-            upc->broker->consumed[FastAlgoDispatch] += 1;
         }
 
         // output
         //printf(" (-) Request consumed: %i\n", upc->broker->requestsConsumed);
-        io_remove_type((Consumers) item, (Request) item, int inRequestQueue[], int consumed[]);
+        io_remove_type((Consumers) algorithmType, (Requests) item, upc->broker->inRequestQueue, upc->broker->consumed);
 
         // when consumer meets production limit
         if(upc->broker->requestsConsumed >= upc->broker->productionLimit)

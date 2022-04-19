@@ -18,7 +18,6 @@ void *produce(void *ptr)
 
         // access buffer exclusively
         sem_wait(&upc->broker->mutex);
-
         // when producer meets production limit
         if(upc->broker->requestsProduced >= upc->broker->productionLimit)
         {
@@ -46,7 +45,7 @@ void *produce(void *ptr)
             upc->broker->inRequestQueue[RoboDriver] += 1;
             upc->broker->produced[HumanDriver] += 1;
         }
-
+        upc->broker->buffer.push(item);
         // output
         //printf(" (+) Request produced: %i\n", upc->broker->requestsProduced);
         io_add_type((Requests) item, upc->broker->inRequestQueue, upc->broker->produced);
