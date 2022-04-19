@@ -3,6 +3,7 @@
 
 #include <semaphore.h>
 #include <pthread.h>
+#include <queue> 
 
 #define HUMAN_REQ_CAP 4
 #define BUFFER_CAP 12
@@ -62,13 +63,14 @@ enum Consumers
 
 struct Broker
 {
-  int *buffer;
+  std::queue <int> buffer;
 
   // semaphores
   sem_t emptyHumanSlots;
   sem_t emptySlots;
   sem_t filledSlots;
   sem_t mutex;
+  sem_t precedence;
 
   int productionLimit;
   int requestsProduced;

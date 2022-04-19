@@ -6,19 +6,25 @@ void *consume(void *ptr)
 
     int item = upc->type;
     int index = 0;
+    int removed;
+    int value;
 
-
-    while (upc->broker->requestsConsumed<upc->broker->productionLimit-1)
+    while (true)
     {
         // wait for filled slots
         sem_wait(&upc->broker->filledSlots);
 
+
         // access buffer exclusively
         sem_wait(&upc->broker->mutex);
 
+        sem_getvalue(&upc->broker->filledSlots, &value);
+        printf("%d\n",value);
+        
         // remove item from buffer
-        int removed = upc->broker->buffer[index];
+        upc->broker->buffer.pop();
         index = (index+1) % BUFFER_CAP;
+
 
         // update consumed counter
         upc->broker->requestsConsumed += 1;     
@@ -26,7 +32,12 @@ void *consume(void *ptr)
         //std::cout << "Requests produced: " << upc->broker->requestsProduced << std::endl;
         printf("Consumes produced: %i\n", upc->broker->requestsConsumed);
         //fflush(stdout);
- 
+
+        if(upc->broker->requestsConsumed>=upc->broker->productionLimit){
+            sem_post(&upc->broker->precedence);
+            break;
+        }
+
         // release exclusive access to buffer
         sem_post(&upc->broker->mutex);
 
