@@ -25,9 +25,9 @@ void *produce(void *ptr)
 
         // update produced counter
         upc->broker->requestsProduced += 1;     
+        
         // printing
-         io_add_type((Requests) item, upc->broker->buffer, upc->broker->production);
-
+        io_add_type((Requests) item, upc->broker->buffer, upc->broker->production);
         printf("Requests produced: %i\n", upc->broker->requestsProduced);
 
         // release exclusive access to buffer
