@@ -1,13 +1,28 @@
-#include "producer.h"
+/**
+ * @file producer.cpp
+ * @authors Rogelio Schevenin, Sawyer Thompson
+ * @redID 824107681, 823687079
+ * @brief producer function definition
+ * @date 2022-04-21
+ */
 
+#include "producer.h"
+#include "io.h"
+
+/**
+ * @brief Producer execution
+ *
+ * @param ptr pointer to shared data structure
+ */
 void *produce(void *ptr)
 {
-    UniquePC *upc = (UniquePC *)ptr;
+    // PC object
+    UniquePC *upc = (UniquePC *)ptr; 
 
     // item to be added to queue
     int item = upc->type;
-    int index = 0;
 
+    // produce
     while (true) 
     {
         // sleep for time to produce

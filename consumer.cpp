@@ -1,15 +1,29 @@
+/**
+ * @file consumer.cpp
+ * @authors Rogelio Schevenin, Sawyer Thompson
+ * @redID 824107681, 823687079
+ * @brief consumer function definition
+ * @date 2022-04-21
+ */
+
 #include "consumer.h"
 
+/**
+ * @brief Consumer execution
+ *
+ * @param ptr pointer to PC object containing shared data structure
+ */
 void *consume(void *ptr)
 {
-    UniquePC *upc = (UniquePC *)ptr;
+    UniquePC *upc = (UniquePC *)ptr; // PC object
 
+    // type of algorithm for consumption
     int algorithmType = upc->type;
-    int index = 0;
-    int item;
-    int removed;
-    int value;
 
+    // type of item being consumed
+    int item; 
+    
+    // consume
     while (true)
     {
         // wait for filled slots
@@ -36,10 +50,13 @@ void *consume(void *ptr)
         // output
         io_remove_type((Consumers) algorithmType, (Requests) item, upc->broker->inRequestQueue, upc->broker->consumed[algorithmType]);
 
-        // if consumer meets production limit, allow termination of main thread
+        // if consumer meets production limit
         if(upc->broker->requestsConsumed >= upc->broker->productionLimit)
         {
+            // allow termination of main thread
             sem_post(&upc->broker->precedence);
+
+            // terminate current thread
             break;
         }
 

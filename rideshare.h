@@ -1,9 +1,20 @@
+/**
+ * @file rideshare.h
+ * @authors Rogelio Schevenin, Sawyer Thompson
+ * @redID 824107681, 823687079
+ * @brief rideshare header file
+ * @date 2022-04-21
+ */
+
 #ifndef RIDESHARE_H
 #define RIDESHARE_H
 
+#include <iostream>
+#include <stdio.h>
+#include <unistd.h>
 #include <semaphore.h>
 #include <pthread.h>
-#include <queue> 
+#include <queue>
 
 #define HUMAN_REQ_CAP 4
 #define BUFFER_CAP 12
@@ -61,6 +72,10 @@ enum Consumers
   ConsumerTypeN = 2,    // Number of consumers
 };
 
+/*
+ * Broker: the shared data structure
+ * Contains data for critical section, semaphores, and counters
+ */
 struct Broker
 {
   std::queue <int> buffer; // queue for requests
@@ -83,10 +98,14 @@ struct Broker
   int *inRequestQueue; // number of requests of each type that are in the request queue
 };
 
+/*
+ * UniquePC: producer/consumer object
+ * Contains shared data structure, sleep and type information
+ */
 struct UniquePC {
-  Broker *broker;
-  float sleepTime;
-  int type;
+  Broker *broker; // shared data structure
+  float sleepTime; // time to sleep
+  int type; // type of producer/consumer
 };
 
 #endif

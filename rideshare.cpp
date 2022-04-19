@@ -1,5 +1,5 @@
 /**
- * @file driver.cpp
+ * @file rideshare.cpp
  * @authors Rogelio Schevenin, Sawyer Thompson
  * @redID 824107681, 823687079
  * @brief Real-time Messaging for Ridesharing entry point
@@ -18,7 +18,6 @@
  */
 int main(int argc, char **argv)
 {
-
     // initialize shared data structure
     Broker *broker = new Broker();
     broker->produced = new int[RequestTypeN];
@@ -153,9 +152,12 @@ int main(int argc, char **argv)
     pthread_create(&fastReqConsumer, NULL, &consume, (void *)FC);
     pthread_create(&costSaveReqConsumer, NULL, &consume, (void *)CSC);
 
-    sem_wait(&broker->precedence); // wait for completion of threads
+    // wait for completion of threads
+    sem_wait(&broker->precedence);
 
-    io_production_report(broker->produced, broker->consumed); // print summary report
+    // print summary report
+    io_production_report(broker->produced, broker->consumed); 
 
+    // exit main thread
     exit(EXIT_SUCCESS);
 }

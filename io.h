@@ -1,3 +1,6 @@
+#ifndef IO_H
+#define IO_H
+
 #include "rideshare.h"
 
 /*
@@ -48,3 +51,5 @@ void io_remove_type(Consumers, Requests, int inRequestQueue[], int consumed[]);
  *    that the cost based algorithm dispatched)
  */
 void io_production_report(int produced[], int *consumed[]);
+
+#endif
