@@ -63,24 +63,24 @@ enum Consumers
 
 struct Broker
 {
-  std::queue <int> buffer;
+  std::queue <int> buffer; // queue for requests
 
   // semaphores
-  sem_t emptyHumanSlots;
-  sem_t emptySlots;
-  sem_t filledSlots;
-  sem_t mutex;
-  sem_t canProduce;
-  sem_t canConsume;
-  sem_t precedence;
+  sem_t emptyHumanSlots; // human requests can be produced
+  sem_t emptySlots; // requests can be produced
+  sem_t filledSlots; // there are requests to be consumed
+  sem_t mutex; // access to critical section
+  sem_t precedence; // allow termination of main thread
 
-  int productionLimit;
-  int requestsProduced;
-  int requestsConsumed;
+  // counters
+  int productionLimit; // request production limit
+  int requestsProduced; // total requests produced
+  int requestsConsumed; // total requests consumed
 
-  int *consumed;
-  int *produced;
-  int *inRequestQueue;
+  // arrays for output
+  int *consumed; // number of requests of each type that have been consumed
+  int *produced; // number of requests of each type that have been produced
+  int *inRequestQueue; // number of requests of each type that are in the request queue
 };
 
 struct UniquePC {

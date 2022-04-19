@@ -10,20 +10,22 @@ void *produce(void *ptr)
 
     while (true) 
     {
-        // sleep for production time
+        // sleep for time to produce
         sleep(upc->sleepTime);
 
         // wait for empty slots
         sem_wait(&upc->broker->emptySlots);
 
-        // access buffer exclusively
+        // obtain exclusive critical section access
         sem_wait(&upc->broker->mutex);
-        // when producer meets production limit
+
+        // if producer meets production limit
         if(upc->broker->requestsProduced >= upc->broker->productionLimit)
         {
-            // release exclusive access to buffer
+            // release exclusive critical section access
             sem_post(&upc->broker->mutex);
             
+            // NOTE: Not sure this is needed
             // inform consumer there are filled slots
             sem_post(&upc->broker->filledSlots);
 
@@ -31,10 +33,13 @@ void *produce(void *ptr)
             break;
         }
 
-        // update produced counter
-        upc->broker->requestsProduced += 1; 
-
         // add to queue
+        upc->broker->buffer.push(item);
+
+        // update produced counter
+        upc->broker->requestsProduced += 1;
+
+        // update counter arrays
         if(item == RoboDriver)
         {
             upc->broker->inRequestQueue[HumanDriver] += 1;
@@ -45,12 +50,12 @@ void *produce(void *ptr)
             upc->broker->inRequestQueue[RoboDriver] += 1;
             upc->broker->produced[HumanDriver] += 1;
         }
-        upc->broker->buffer.push(item);
+
         // output
         //printf(" (+) Request produced: %i\n", upc->broker->requestsProduced);
         io_add_type((Requests) item, upc->broker->inRequestQueue, upc->broker->produced);
 
-        // release exclusive access to buffer
+        // release exclusive critical section access
         sem_post(&upc->broker->mutex);
         
         // inform consumer there are filled slots

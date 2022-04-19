@@ -15,13 +15,16 @@ void *consume(void *ptr)
         // wait for filled slots
         sem_wait(&upc->broker->filledSlots);
 
-        // access buffer exclusively
+        // obtain exclusive critical section access
         sem_wait(&upc->broker->mutex);
         
-        // update consumed counter 
-        upc->broker->requestsConsumed += 1;   
+        // remove from queue and save item
         item = upc->broker->buffer.front();
         upc->broker->buffer.pop();
+
+        // update consumed counter 
+        upc->broker->requestsConsumed += 1; 
+
         // add Type
         if (algorithmType == CostAlgoDispatch)
         {
@@ -46,15 +49,14 @@ void *consume(void *ptr)
         //printf(" (-) Request consumed: %i\n", upc->broker->requestsConsumed);
         io_remove_type((Consumers) algorithmType, (Requests) item, upc->broker->inRequestQueue, upc->broker->consumed);
 
-        // when consumer meets production limit
+        // if consumer meets production limit
         if(upc->broker->requestsConsumed >= upc->broker->productionLimit)
         {
-            printf(" (*) DONE CONSUMING.\n");
             sem_post(&upc->broker->precedence);
             break;
         }
 
-        // release exclusive access to buffer
+        // release exclusive critical section access
         sem_post(&upc->broker->mutex);
 
         // inform producer there are empty slots
