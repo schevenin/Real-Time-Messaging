@@ -21,9 +21,9 @@ int main(int argc, char **argv)
 
     // initialize shared data structure
     Broker *broker = new Broker();
-    broker->production = new int[broker->productionLimit];
-    broker->consumed = new int[broker->productionLimit];
-    broker->inRequestQueue = new int[BUFFER_CAP];
+    // broker->production = new int[broker->productionLimit];
+    // broker->consumed = new int[broker->productionLimit];
+    // broker->inRequestQueue = new int[BUFFER_CAP];
 
     // initialize PC objects
     UniquePC *HR = new UniquePC();
@@ -143,6 +143,8 @@ int main(int argc, char **argv)
     sem_init(&broker->emptySlots, 0, BUFFER_CAP);
     sem_init(&broker->emptyHumanSlots, 0, HUMAN_REQ_CAP);
     sem_init(&broker->mutex, 0, 1);
+    sem_init(&broker->production, 0, 1);
+    sem_init(&broker->consumption, 0, 1);
     sem_init(&broker->precedence, 0, 0);
 
     // create threads for 2 producers and 2 consumers
@@ -151,8 +153,6 @@ int main(int argc, char **argv)
     pthread_create(&fastReqConsumer, NULL, &consume, (void *) FC);
     pthread_create(&costSaveReqConsumer, NULL, &consume, (void *) CSC);
 
-    sem_wait(&broker->precedence);
-    sem_wait(&broker->precedence);
     sem_wait(&broker->precedence);
 
     exit(EXIT_SUCCESS);

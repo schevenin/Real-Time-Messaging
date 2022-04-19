@@ -21,23 +21,31 @@ void *produce(void *ptr)
 
         // place new item in buffer
         upc->broker->buffer.push(item);
-        
-        // update produced counter
-        upc->broker->requestsProduced += 1;     
-        
-        // printing
-         io_add_type((Requests) item, upc->broker->production, upc->broker->production);
 
-        printf("Requests produced: %i\n", upc->broker->requestsProduced);
-
-        if(upc->broker->requestsProduced>=upc->broker->productionLimit){
-            break;
-        }
         // release exclusive access to buffer
         sem_post(&upc->broker->mutex);
         
         // inform consumer there are filled slots
         sem_post(&upc->broker->filledSlots);
+
+        // obtain access to number of requests produced
+        sem_wait(&upc->broker->production);
+
+        // update produced counter
+        upc->broker->requestsProduced += 1; 
+
+        printf(" (+) Request produced: %i\n", upc->broker->requestsProduced);
+        
+        // when producer meets production limit
+        if(upc->broker->requestsProduced >= upc->broker->productionLimit)
+        {
+            printf(" (*) DONE PRODUCING.\n");
+            break;
+        }
+
+        // release access to number of requests produced
+        sem_post(&upc->broker->production);
     }
 
+    return (void *) NULL;
 }

@@ -14,29 +14,15 @@ void *consume(void *ptr)
         // wait for filled slots
         sem_wait(&upc->broker->filledSlots);
 
-
         // access buffer exclusively
         sem_wait(&upc->broker->mutex);
 
-        sem_getvalue(&upc->broker->filledSlots, &value);
-        printf("%d\n",value);
-
         // remove item from buffer
         upc->broker->buffer.pop();
-        index = (index+1) % BUFFER_CAP;
 
-
-        // update consumed counter
-        upc->broker->requestsConsumed += 1;     
-        
-        //std::cout << "Requests produced: " << upc->broker->requestsProduced << std::endl;
-        printf("Consumes produced: %i\n", upc->broker->requestsConsumed);
-        //fflush(stdout);
-
-        if(upc->broker->requestsConsumed>=upc->broker->productionLimit){
-            sem_post(&upc->broker->precedence);
-            break;
-        }
+        // testing
+        sem_getvalue(&upc->broker->filledSlots, &value);
+        //printf("filled slots: %d\n",value);
 
         // release exclusive access to buffer
         sem_post(&upc->broker->mutex);
@@ -47,6 +33,26 @@ void *consume(void *ptr)
         // sleep for time to consume
         sleep(upc->sleepTime);
 
-    }
+        // obtain access to number of requests consumed
+        sem_wait(&upc->broker->consumption);
 
+        // update consumed counter 
+        upc->broker->requestsConsumed += 1;    
+
+        // printing
+        printf(" (-) Request consumed: %i\n", upc->broker->requestsConsumed);
+
+        // when consumer meets production limit
+        if(upc->broker->requestsConsumed >= upc->broker->productionLimit)
+        {
+            printf(" (*) DONE CONSUMING.\n");
+            sem_post(&upc->broker->precedence);
+            break;
+        }
+
+        // release access to number of requests consumed
+        sem_post(&upc->broker->consumption);
+
+    }
+    return (void *) NULL;
 }
