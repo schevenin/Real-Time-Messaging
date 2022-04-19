@@ -70,17 +70,17 @@ struct Broker
   sem_t emptySlots;
   sem_t filledSlots;
   sem_t mutex;
-  sem_t production;
-  sem_t consumption;
+  sem_t canProduce;
+  sem_t canConsume;
   sem_t precedence;
 
   int productionLimit;
   int requestsProduced;
   int requestsConsumed;
 
-  // int *production;
-  // int *consumed;
-  // int *inRequestQueue;
+  int *consumed;
+  int *produced;
+  int *inRequestQueue;
 };
 
 struct UniquePC {

@@ -16,31 +16,25 @@ void *consume(void *ptr)
 
         // access buffer exclusively
         sem_wait(&upc->broker->mutex);
-
-        // remove item from buffer
-        upc->broker->buffer.pop();
-
-        // testing
-        sem_getvalue(&upc->broker->filledSlots, &value);
-        //printf("filled slots: %d\n",value);
-
-        // release exclusive access to buffer
-        sem_post(&upc->broker->mutex);
-
-        // inform producer there are empty slots
-        sem_post(&upc->broker->emptySlots);
-
-        // sleep for time to consume
-        sleep(upc->sleepTime);
-
-        // obtain access to number of requests consumed
-        sem_wait(&upc->broker->consumption);
-
+        
         // update consumed counter 
-        upc->broker->requestsConsumed += 1;    
+        upc->broker->requestsConsumed += 1;   
 
-        // printing
-        printf(" (-) Request consumed: %i\n", upc->broker->requestsConsumed);
+        // remove from queue
+        if (item == RoboDriver)
+        {
+            upc->broker->inRequestQueue[RoboDriver] -= 1;
+            upc->broker->consumed[CostAlgoDispatch] += 1;
+        }
+        else if (item == HumanDriver)
+        {
+            upc->broker->inRequestQueue[HumanDriver] -= 1;
+            upc->broker->consumed[FastAlgoDispatch] += 1;
+        }
+
+        // output
+        //printf(" (-) Request consumed: %i\n", upc->broker->requestsConsumed);
+        io_remove_type((Consumers) item, (Request) item, int inRequestQueue[], int consumed[]);
 
         // when consumer meets production limit
         if(upc->broker->requestsConsumed >= upc->broker->productionLimit)
@@ -50,8 +44,14 @@ void *consume(void *ptr)
             break;
         }
 
-        // release access to number of requests consumed
-        sem_post(&upc->broker->consumption);
+        // release exclusive access to buffer
+        sem_post(&upc->broker->mutex);
+
+        // inform producer there are empty slots
+        sem_post(&upc->broker->emptySlots);
+
+        // sleep for time to consume
+        sleep(upc->sleepTime);
 
     }
     return (void *) NULL;

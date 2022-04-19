@@ -21,9 +21,10 @@ int main(int argc, char **argv)
 
     // initialize shared data structure
     Broker *broker = new Broker();
-    // broker->production = new int[broker->productionLimit];
-    // broker->consumed = new int[broker->productionLimit];
-    // broker->inRequestQueue = new int[BUFFER_CAP];
+
+    broker->consumed = new int[broker->productionLimit];
+    broker->produced = new int[broker->productionLimit];
+    broker->inRequestQueue = new int[RequestTypeN];
 
     // initialize PC objects
     UniquePC *HR = new UniquePC();
@@ -138,14 +139,14 @@ int main(int argc, char **argv)
     pthread_t fastReqConsumer;
     pthread_t costSaveReqConsumer;
 
-    //initialize semaphores
-    sem_init(&broker->filledSlots, 0, 0);
-    sem_init(&broker->emptySlots, 0, BUFFER_CAP);
-    sem_init(&broker->emptyHumanSlots, 0, HUMAN_REQ_CAP);
-    sem_init(&broker->mutex, 0, 1);
-    sem_init(&broker->production, 0, 1);
-    sem_init(&broker->consumption, 0, 1);
-    sem_init(&broker->precedence, 0, 0);
+    // initialize semaphores
+    sem_init(&broker->filledSlots, 0, 0); // there are requests in queue
+    sem_init(&broker->emptySlots, 0, BUFFER_CAP); // there is space for requests in queue
+    sem_init(&broker->emptyHumanSlots, 0, HUMAN_REQ_CAP); // there is space for human requests in queue
+    sem_init(&broker->mutex, 0, 1); // mutex for accessing buffer critical section
+    sem_init(&broker->canProduce, 0, 1); // production occurs
+    sem_init(&broker->canConsume, 0, 1); // consumption occurs
+    sem_init(&broker->precedence, 0, 0); // block main thread
 
     // create threads for 2 producers and 2 consumers
     pthread_create(&humanReqProducer, NULL, &produce, (void *) HR);
@@ -153,7 +154,7 @@ int main(int argc, char **argv)
     pthread_create(&fastReqConsumer, NULL, &consume, (void *) FC);
     pthread_create(&costSaveReqConsumer, NULL, &consume, (void *) CSC);
 
-    sem_wait(&broker->precedence);
+    sem_wait(&broker->precedence); // wait for completion of threads
 
     exit(EXIT_SUCCESS);
 }

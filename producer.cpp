@@ -19,32 +19,43 @@ void *produce(void *ptr)
         // access buffer exclusively
         sem_wait(&upc->broker->mutex);
 
-        // place new item in buffer
-        upc->broker->buffer.push(item);
+        // when producer meets production limit
+        if(upc->broker->requestsProduced >= upc->broker->productionLimit)
+        {
+            // release exclusive access to buffer
+            sem_post(&upc->broker->mutex);
+            
+            // inform consumer there are filled slots
+            sem_post(&upc->broker->filledSlots);
+
+            // end thread
+            break;
+        }
+
+        // update produced counter
+        upc->broker->requestsProduced += 1; 
+
+        // add to queue
+        if(item == RoboDriver)
+        {
+            upc->broker->inRequestQueue[HumanDriver] += 1;
+            upc->broker->produced[RoboDriver] += 1;
+        }
+        else if (item == HumanDriver)
+        {
+            upc->broker->inRequestQueue[RoboDriver] += 1;
+            upc->broker->produced[HumanDriver] += 1;
+        }
+
+        // output
+        //printf(" (+) Request produced: %i\n", upc->broker->requestsProduced);
+        io_add_type((Requests) item, upc->broker->inRequestQueue, upc->broker->produced);
 
         // release exclusive access to buffer
         sem_post(&upc->broker->mutex);
         
         // inform consumer there are filled slots
         sem_post(&upc->broker->filledSlots);
-
-        // obtain access to number of requests produced
-        sem_wait(&upc->broker->production);
-
-        // update produced counter
-        upc->broker->requestsProduced += 1; 
-
-        printf(" (+) Request produced: %i\n", upc->broker->requestsProduced);
-        
-        // when producer meets production limit
-        if(upc->broker->requestsProduced >= upc->broker->productionLimit)
-        {
-            printf(" (*) DONE PRODUCING.\n");
-            break;
-        }
-
-        // release access to number of requests produced
-        sem_post(&upc->broker->production);
     }
 
     return (void *) NULL;
