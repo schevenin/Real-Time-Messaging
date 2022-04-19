@@ -20,7 +20,7 @@ void *consume(void *ptr)
 
         sem_getvalue(&upc->broker->filledSlots, &value);
         printf("%d\n",value);
-        
+
         // remove item from buffer
         upc->broker->buffer.pop();
         index = (index+1) % BUFFER_CAP;
