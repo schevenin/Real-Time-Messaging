@@ -78,14 +78,14 @@ struct Broker
   int requestsConsumed; // total requests consumed
 
   // arrays for output
-  int *consumed; // number of requests of each type that have been consumed
+  int **consumed; // number of requests of each type (HDR and RDR) that have been consumed
   int *produced; // number of requests of each type that have been produced
   int *inRequestQueue; // number of requests of each type that are in the request queue
 };
 
 struct UniquePC {
   Broker *broker;
-  int sleepTime;
+  float sleepTime;
   int type;
 };
 

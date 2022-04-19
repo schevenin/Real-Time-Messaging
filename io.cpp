@@ -107,7 +107,7 @@ void io_add_type(Requests requestType, int inRequestQueue[], int produced[]) {
     total += produced[idx];  /* track total produced */
     if (idx > 0)
       printf(" + ");  /* separator */
-    printf("%d %s", produced[idx], producerAbbrevs[idx], produced[idx]);
+    printf("%d %s", produced[idx], producerAbbrevs[idx]);
   }
   /* total produced over how long */
   printf(" = %d in %.3f s.\n", total, elapsed_s());
