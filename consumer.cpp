@@ -26,18 +26,11 @@ void *consume(void *ptr)
     // consume
     while (true)
     {
-
-        printf("Consumer type %i: waiting for filled slots\n", algorithmType);
-
         // wait for filled slots
         sem_wait(&upc->broker->filledSlots);
 
-        printf("Consumer type %i: waiting for access to critical section\n", algorithmType);
-
         // obtain exclusive critical section access
         sem_wait(&upc->broker->mutex);
-        
-        printf("Consumer type %i: in critical section\n", algorithmType);
 
         // remove from queue and save item
         item = upc->broker->buffer.front();
@@ -63,26 +56,12 @@ void *consume(void *ptr)
         // inform producer there are empty slots
         sem_post(&upc->broker->emptySlots);
 
-        // started sleeping
-        // sem_wait(&upc->broker->sleeping);
         // sleep for time to consume
         usleep(upc->sleepTime);
-        // finished sleeping
-        //sem_post(&upc->broker->sleeping);
-
-
-        printf("Requests consumed: %i\n", upc->broker->requestsConsumed);
-        printf("Buffer empty: %i\n", upc->broker->buffer.size() == 0);
 
         // if consumer meets production limit & queue is empty
         if ((upc->broker->requestsConsumed >= upc->broker->productionLimit) && (upc->broker->buffer.size() == 0))
         {            
-
-            printf("CONSUMER FINISHED.\n");
-
-            // sem_wait(&upc->broker->sleeping);
-            // sem_wait(&upc->broker->sleeping);
-
             // signal main thread that a consumer finished
             sem_post(&upc->broker->precedence);
 
