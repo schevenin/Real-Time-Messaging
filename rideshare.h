@@ -86,6 +86,7 @@ struct Broker
   sem_t filledSlots; // there are requests to be consumed
   sem_t mutex; // access to critical section
   sem_t precedence; // allow termination of main thread
+  //sem_t sleeping; 
 
   // counters
   int productionLimit; // request production limit

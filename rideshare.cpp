@@ -145,14 +145,15 @@ int main(int argc, char **argv)
     sem_init(&broker->emptyHumanSlots, 0, HUMAN_REQ_CAP); // there is space for human requests in queue
     sem_init(&broker->mutex, 0, 1);                       // mutex for accessing buffer critical section
     sem_init(&broker->precedence, 0, 0);                  // block main thread
-
+    // sem_init(&broker->sleeping, 0, 2);
+    
     // create threads for 2 producers and 2 consumers
     pthread_create(&humanReqProducer, NULL, &produce, (void *)HDR);
     pthread_create(&autoReqProducer, NULL, &produce, (void *)RDR);
     pthread_create(&fastReqConsumer, NULL, &consume, (void *)FC);
     pthread_create(&costSaveReqConsumer, NULL, &consume, (void *)CSC);
 
-    // wait for completion of threads
+    // wait for completion of both consumer threads
     sem_wait(&broker->precedence);
 
     // print summary report
