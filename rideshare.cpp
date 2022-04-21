@@ -154,6 +154,7 @@ int main(int argc, char **argv)
 
     // wait for completion of consumer
     sem_wait(&broker->precedence);
+    //sem_wait(&broker->precedence);
 
     // print summary report
     io_production_report(broker->produced, broker->consumed); 
