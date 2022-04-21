@@ -26,7 +26,28 @@ void *produce(void *ptr)
     while (true) 
     {
 
-        // if producer meets production limit
+        // sleep for time to produce
+        usleep(upc->sleepTime);
+
+        printf("Producer %i produced request. Total: %i\n", item, upc->broker->requestsProduced);
+
+        printf("Producer %i waiting for empty slots.\n", item);
+
+        // wait for empty slot in queue
+        sem_wait(&upc->broker->emptySlots);
+
+ 
+        // if producing HDR, wait for HDR slot
+        if (item == HumanDriver)
+        {
+            sem_wait(&upc->broker->emptyHumanSlots);
+        }
+        printf("Producer %i waiting for mutex access.\n", item);
+
+        // obtain exclusive critical section access
+        sem_wait(&upc->broker->mutex);
+
+         // if producer meets production limit
         if(upc->broker->requestsProduced >= upc->broker->productionLimit)
         {
 
@@ -38,27 +59,6 @@ void *produce(void *ptr)
             // end thread
             break;
         }
-
-        // sleep for time to produce
-        usleep(upc->sleepTime);
-
-        printf("Producer %i produced request. Total: %i\n", item, upc->broker->requestsProduced);
-
-        // if producing HDR, wait for HDR slot
-        if (item == HumanDriver)
-        {
-            sem_wait(&upc->broker->emptyHumanSlots);
-        }
-
-        printf("Producer %i waiting for empty slots.\n", item);
-
-        // wait for empty slot in queue
-        sem_wait(&upc->broker->emptySlots);
-
-        printf("Producer %i waiting for mutex access.\n", item);
-
-        // obtain exclusive critical section access
-        sem_wait(&upc->broker->mutex);
 
         printf("Producer %i obtained mutex access.\n", item);
 
