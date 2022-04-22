@@ -152,9 +152,9 @@ int main(int argc, char **argv)
     pthread_create(&fastReqConsumer, NULL, &consume, (void *)FC);
     pthread_create(&costSaveReqConsumer, NULL, &consume, (void *)CSC);
 
-    // wait for completion of consumer
+    // wait for completion of consumers
     sem_wait(&broker->precedence);
-    //sem_wait(&broker->precedence);
+    sem_wait(&broker->precedence);
 
     // print summary report
     io_production_report(broker->produced, broker->consumed); 

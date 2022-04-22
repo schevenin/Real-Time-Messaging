@@ -25,42 +25,30 @@ void *produce(void *ptr)
     // produce
     while (true) 
     {
-
         // sleep for time to produce
         usleep(upc->sleepTime);
-
-        printf("Producer %i produced request. Total: %i\n", item, upc->broker->requestsProduced);
-
-        printf("Producer %i waiting for empty slots.\n", item);
 
         // wait for empty slot in queue
         sem_wait(&upc->broker->emptySlots);
 
- 
         // if producing HDR, wait for HDR slot
         if (item == HumanDriver)
         {
             sem_wait(&upc->broker->emptyHumanSlots);
         }
-        printf("Producer %i waiting for mutex access.\n", item);
 
         // obtain exclusive critical section access
         sem_wait(&upc->broker->mutex);
 
-         // if producer meets production limit
-        if(upc->broker->requestsProduced >= upc->broker->productionLimit)
+        // if producers met production limit
+        if (upc->broker->requestsProduced >= upc->broker->productionLimit)
         {
-
-            printf("Requests produced met limit, killing current thread.\n");
-
             // release exclusive critical section access
             sem_post(&upc->broker->mutex);
 
             // end thread
             break;
         }
-
-        printf("Producer %i obtained mutex access.\n", item);
 
         // add to queue
         upc->broker->buffer.push(item);
@@ -71,17 +59,15 @@ void *produce(void *ptr)
         upc->broker->produced[item] += 1;
 
         // output
-        io_add_type((Requests) item, upc->broker->inRequestQueue, upc->broker->produced);
+        //io_add_type((Requests) item, upc->broker->inRequestQueue, upc->broker->produced);
 
         // release exclusive critical section access
         sem_post(&upc->broker->mutex);
 
-        printf("Producer %i released mutex access.\n", item);
-        
         // inform consumer there are filled slots
         sem_post(&upc->broker->filledSlots);
 
-        printf("Producer %i informed consumer of filled slots.\n", item);
+        
     }
 
     return (void *) NULL;

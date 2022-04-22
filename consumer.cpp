@@ -26,24 +26,39 @@ void *consume(void *ptr)
     // consume
     while (true)
     {
-        
-        printf("Consumer %i waiting for filled slots.\n", algorithmType);
+        // no more requests will be produced and buffer is empty
+        if ((upc->broker->requestsProduced == upc->broker->productionLimit) && (upc->broker->buffer.size() == 0))
+        {
+            printf("Consumer %i has no more requests to consume, consumer leaving.\n", algorithmType);
+
+            // signal to main thread that a consumer finished
+            sem_post(&upc->broker->precedence);
+
+            // terminate current consumer thread
+            break;
+        }
+
+        printf("Consumer %i waiting on filled slots.\n", algorithmType);
 
         // wait for filled slots
-        sem_wait(&upc->broker->filledSlots);
+        sem_wait(&upc->broker->filledSlots);            
 
-        printf("Consumer %i waiting for mutex access.\n", algorithmType);
+        printf("Consumer %i waiting on mutex access.\n", algorithmType);
 
         // obtain exclusive critical section access
         sem_wait(&upc->broker->mutex);
 
-        printf("Consumer %i obtained mutex access.\n", algorithmType);
-
         // remove from queue and save item
         item = upc->broker->buffer.front();
         upc->broker->buffer.pop();
+
         upc->broker->inRequestQueue[item] -= 1;
-        upc->broker->consumed[algorithmType][item] += 1;
+        
+        // release exclusive critical section access
+        sem_post(&upc->broker->mutex);
+
+        // inform producer there are empty slots
+        sem_post(&upc->broker->emptySlots);
 
         // if item consumed was HDR, inform producer there is space for HDR
         if (item == HumanDriver)
@@ -51,39 +66,26 @@ void *consume(void *ptr)
             sem_post(&upc->broker->emptyHumanSlots);
         }
 
-        // output
-        io_remove_type((Consumers) algorithmType, (Requests) item, upc->broker->inRequestQueue, upc->broker->consumed[algorithmType]);
-
-        // release exclusive critical section access
-        sem_post(&upc->broker->mutex);
-
-        printf("Consumer %i released mutex access.\n", algorithmType);
-
-        // inform producer there are empty slots
-        sem_post(&upc->broker->emptySlots);
-
-        printf("Consumer %i informed producer of empty slots.\n", algorithmType);
-
         // sleep for time to consume
         usleep(upc->sleepTime);
 
-        // after it finishes consuming, update counter
-        upc->broker->requestsConsumed += 1; 
-        
-        printf("Consumer %i consumed request. Total: %i\n", algorithmType, upc->broker->requestsConsumed);
+        upc->broker->requestsConsumed += 1;
+        upc->broker->consumed[algorithmType][item] += 1;
 
-        // if consumer meets production limit & queue is empty
-        if ((upc->broker->requestsConsumed >= upc->broker->productionLimit) && (upc->broker->buffer.size() == 0))
-        {
+        // output
+        //io_remove_type((Consumers) algorithmType, (Requests) item, upc->broker->inRequestQueue, upc->broker->consumed[algorithmType]);
+        printf("Consumer %i finished consuming request. Total: %i\n", algorithmType, upc->broker->requestsConsumed);
+
+        // if all requests have been consumed and buffer is empty
+        if ((upc->broker->requestsConsumed == upc->broker->productionLimit) && (upc->broker->buffer.size() == 0))  {
             
-            printf("Consumer %i informed that consumption has met production limit.\n", algorithmType);
-
-            // signal main thread that a consumer finished
+            // signal to main thread that a consumption reached production limit
+            sem_post(&upc->broker->precedence);
             sem_post(&upc->broker->precedence);
 
-            // terminate current consumer thread
             break;
         }
+        
     }
 
     return (void *) NULL;
